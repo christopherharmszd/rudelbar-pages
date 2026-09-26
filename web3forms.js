@@ -22,6 +22,40 @@
   }
 
   function enhanceForm(form) {
+    const nameInput = form.querySelector('[name="name"]');
+    if (nameInput) {
+      nameInput.placeholder = 'Z. B. Anna Müller oder euer Verein';
+      nameInput.autocomplete = 'name';
+    }
+
+    const locationInput = form.querySelector('[name="termin"], [name="ort"]');
+    if (locationInput) {
+      form.dataset.eventRequest = 'true';
+      locationInput.name = 'ort';
+      locationInput.placeholder = 'Z. B. Echem oder euer Veranstaltungsort';
+
+      const locationLabel = locationInput.closest('label');
+      if (locationLabel?.firstChild?.nodeType === Node.TEXT_NODE) {
+        locationLabel.firstChild.textContent = 'Wo soll es stattfinden?';
+      }
+
+      if (!form.querySelector('[name="wunschdatum"]')) {
+        const dateLabel = document.createElement('label');
+        dateLabel.textContent = 'Wann soll es stattfinden? (optional)';
+
+        const dateInput = document.createElement('input');
+        dateInput.type = 'date';
+        dateInput.name = 'wunschdatum';
+        dateLabel.append(dateInput);
+        locationLabel.after(dateLabel);
+      }
+
+      const messageInput = form.querySelector('[name="nachricht"]');
+      if (messageInput) {
+        messageInput.placeholder = 'Erzähl uns kurz von eurem Anlass und was ihr euch für den Abend wünscht.';
+      }
+    }
+
     if (!form.querySelector('[name="email"]')) {
       const label = document.createElement('label');
       label.textContent = 'Deine E-Mail-Adresse';
@@ -77,13 +111,25 @@
 
     const button = form.querySelector('button[type="submit"]');
     const status = form.querySelector('.form-send-status');
-    const isEventRequest = Boolean(form.querySelector('[name="termin"]'));
+    const isEventRequest = form.dataset.eventRequest === 'true';
     const formData = new FormData(form);
     formData.set('access_key', accessKey);
     formData.set('subject', isEventRequest ? 'Rudelbar: Event-Anfrage' : 'Rudelbar: Kontaktanfrage');
     formData.set('from_name', 'Rudelbar Website');
     formData.set('message', String(formData.get('nachricht') || ''));
     formData.delete('nachricht');
+    if (isEventRequest) {
+      const location = String(formData.get('ort') || '').trim();
+      if (location) formData.set('Ort', location);
+      formData.delete('ort');
+
+      const date = String(formData.get('wunschdatum') || '');
+      if (date) {
+        const [year, month, day] = date.split('-');
+        formData.set('Wunschtermin', `${day}.${month}.${year}`);
+      }
+      formData.delete('wunschdatum');
+    }
 
     form.dataset.sending = 'true';
     form.setAttribute('aria-busy', 'true');
