@@ -1,0 +1,59 @@
+name: Rudelbar Produktionswebsite
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/production.yml']
+  schedule:
+    - cron: '3,18,33,48 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Freigegebenen Website-Quellcode laden
+        uses: actions/checkout@v6
+        with:
+          repository: christopherharmszd/rudelbar-2.0
+          ref: 48ef0309ce26495daaa040658f71329176872f13
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Produktionswebsite bauen und testen
+        working-directory: app
+        env:
+          RUDELBAR_SOURCE_SHA: 48ef0309ce26495daaa040658f71329176872f13
+        run: |
+          npm ci
+          npm run build:production
+          npm run test:production
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: app/dist/production
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Produktionswebsite veröffentlichen
+        uses: actions/deploy-pages@v4
+        id: deployment
