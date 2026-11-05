@@ -27,7 +27,7 @@ jobs:
         with:
           repository: christopherharmszd/rudelbar-2.0
           ref: ab5395d1e0a1bd0190564f6e32a9ee7066c221a9
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 22
           cache: npm
@@ -40,8 +40,8 @@ jobs:
           npm ci
           npm run build:production
           npm run test:production
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/configure-pages@v6.0.0
+      - uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: app/dist/production
   deploy:
@@ -55,5 +55,5 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Produktionswebsite veröffentlichen
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1
         id: deployment
