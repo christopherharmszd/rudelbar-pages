@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: christopherharmszd/rudelbar-2.0
-          ref: ab5395d1e0a1bd0190564f6e32a9ee7066c221a9
+          ref: c5178a1b099fad1d7baee4013921d891925b1038
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: 22
@@ -35,7 +35,7 @@ jobs:
       - name: Produktionswebsite bauen und testen
         working-directory: app
         env:
-          RUDELBAR_SOURCE_SHA: ab5395d1e0a1bd0190564f6e32a9ee7066c221a9
+          RUDELBAR_SOURCE_SHA: c5178a1b099fad1d7baee4013921d891925b1038
         run: |
           npm ci
           npm run build:production
